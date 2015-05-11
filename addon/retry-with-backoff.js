@@ -1,7 +1,8 @@
 import Em from 'ember';
 import delay from 'ember-delay/delay';
 
-var retryWithBackoff = function(callback, retryCountBeforeFailure, waitInMilliseconds) {
+var retryWithBackoff = function(callback, retryCountBeforeFailure, waitInMilliseconds, options) {
+  options = options || {}
   if(Em.isEmpty(retryCountBeforeFailure)) {
     retryCountBeforeFailure = 5;
   }
@@ -12,7 +13,8 @@ var retryWithBackoff = function(callback, retryCountBeforeFailure, waitInMillise
       waitInMilliseconds = waitInMilliseconds * 2;
 
       return delay(waitInMilliseconds).then(function() {
-        return retryWithBackoff(callback, retryCountBeforeFailure, waitInMilliseconds);
+        options.onRetry && options.onRetry(retryCountBeforeFailure, waitInMilliseconds)
+        return retryWithBackoff(callback, retryCountBeforeFailure, waitInMilliseconds, options);
       });
     }
 
